@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(flutter devices *)",
+      "Bash(flutter run *)",
+      "Bash(pkill -f \"flutter_tools.snapshot run -d emul[a]tor\")"
+    ]
+  }
+}

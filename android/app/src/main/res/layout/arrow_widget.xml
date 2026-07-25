@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/widget_background"
+    android:padding="10dp">
+
+    <!-- The game board (big) -->
+    <ImageView
+        android:id="@+id/widget_board"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:scaleType="fitCenter"
+        android:contentDescription="Arrow Escape board" />
+
+    <!-- Slim control row at the bottom -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="6dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/widget_status"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textColor="#5C4A80"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:text="Arrow Escape" />
+
+        <TextView
+            android:id="@+id/widget_play"
+            android:layout_width="40dp"
+            android:layout_height="34dp"
+            android:gravity="center"
+            android:background="@drawable/widget_button"
+            android:text="▶"
+            android:textSize="15sp"
+            android:textColor="#EE4F86" />
+
+        <TextView
+            android:id="@+id/widget_new"
+            android:layout_width="40dp"
+            android:layout_height="34dp"
+            android:layout_marginStart="6dp"
+            android:gravity="center"
+            android:background="@drawable/widget_button"
+            android:text="↻"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#9B7BF0" />
+
+        <TextView
+            android:id="@+id/widget_open"
+            android:layout_width="40dp"
+            android:layout_height="34dp"
+            android:layout_marginStart="6dp"
+            android:gravity="center"
+            android:background="@drawable/widget_button"
+            android:text="⛶"
+            android:textSize="15sp"
+            android:textColor="#5C4A80" />
+    </LinearLayout>
+</LinearLayout>
