@@ -1437,7 +1437,8 @@ class _GamePageState extends State<GamePage>
     _soundIndex = (_soundIndex + 1) % _soundPool.length;
     try {
       await player.stop();
-      // Same sample, but pitched apart so big and small read differently.
+      // Two different samples, pitched further apart so a long arrow lands
+      // heavier than a stubby one.
       await player.setPlaybackRate(big ? 0.85 : 1.15);
       await player.play(
         AssetSource(big ? 'sounds/arrow_big.mp3' : 'sounds/arrow_small.mp3'),
