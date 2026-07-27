@@ -14,9 +14,10 @@ import es.antonborri.home_widget.HomeWidgetProvider
 
 /**
  * Home-screen widget: the live game board on top (rendered to a bitmap by the
- * Flutter side) with a slim control row underneath. The Play/New buttons run
- * game logic in a background Dart isolate; tapping the board opens the app on
- * the exact same saved game.
+ * Flutter side) with a slim control row underneath. The game is playable
+ * right inside the widget: tapping the board (or ▶) fires the next free arrow
+ * via a background Dart isolate — no app launch. ⛶ opens the full app on the
+ * exact same saved game.
  */
 class ArrowWidgetProvider : HomeWidgetProvider() {
 
@@ -59,10 +60,13 @@ class ArrowWidgetProvider : HomeWidgetProvider() {
                 widgetData.getString("widget_status", "Arrow Escape")
             )
 
-            // Board tap → open the app on the same game.
+            // Board tap → play a move right here in the widget (background
+            // Dart callback, no app launch).
             views.setOnClickPendingIntent(
                 R.id.widget_board,
-                HomeWidgetLaunchIntent.getActivity(context, MainActivity::class.java)
+                HomeWidgetBackgroundIntent.getBroadcast(
+                    context, Uri.parse("arrowgame://play")
+                )
             )
 
             // Control row → background Dart callbacks (no app launch).
