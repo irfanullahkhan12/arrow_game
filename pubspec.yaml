@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.0+1
+version: 1.0.0+3
 
 environment:
   sdk: ^3.12.1
@@ -38,6 +38,11 @@ dependencies:
   home_widget: ^0.7.0
   audioplayers: ^6.1.0
   google_fonts: ^6.2.1
+  google_mobile_ads: ^9.1.0
+  purchases_flutter: ^10.10.1
+  flutter_local_notifications: ^22.3.0
+  timezone: ^0.11.1
+  path_provider: ^2.1.6
 
 dev_dependencies:
   flutter_test:
@@ -49,6 +54,7 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.4
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -62,8 +68,17 @@ flutter:
   uses-material-design: true
 
   assets:
+    # One fire sound per arrow kind, plus the deeper sample long plain arrows
+    # use. See lib/services/sound_service.dart.
     - assets/sounds/arrow_big.mp3
     - assets/sounds/arrow_small.mp3
+    - assets/sounds/black.wav
+    - assets/sounds/rainbow.wav
+    - assets/sounds/gost.wav
+    - assets/sounds/bomb.wav
+    - assets/sounds/chancemiss.wav
+    - assets/sounds/gameover.wav
+    - assets/images/app_icon.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:
@@ -95,3 +110,12 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+# Launcher icon generation: `dart run flutter_launcher_icons`
+flutter_launcher_icons:
+  image_path: "assets/images/app_icon.png"
+  android: "ic_launcher"
+  min_sdk_android: 24
+  remove_alpha_ios: true
+  adaptive_icon_background: "#2A0B45"
+  adaptive_icon_foreground: "assets/images/app_icon.png"

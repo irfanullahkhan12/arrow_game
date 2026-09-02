@@ -50,3 +50,8 @@ arowgame.zip
 
 # API keys for --dart-define-from-file (never commit)
 env.json
+
+# Release signing — never commit these
+android/key.properties
+**/*.jks
+**/*.keystore

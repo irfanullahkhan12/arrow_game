@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="widget_description">Play Arrow Escape right on your home screen</string>
+    <string name="widget_board_description">Arrow Escape board — tap to fire the next arrow</string>
+    <string name="widget_play">▶  FIRE</string>
 </resources>

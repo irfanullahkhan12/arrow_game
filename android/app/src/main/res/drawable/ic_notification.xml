@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The status-bar icon. Android draws it as a silhouette, so it is a flat white
+  shape with a transparent background; the colour comes from the notification's
+  own accent. It is the game's own motif: an arrow with a bend in it.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24"
+    android:tint="#FFFFFF">
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M13.5,3 L21,10.5 L13.5,18 L13.5,13.5 L9,13.5 L9,21 L4.5,21 L4.5,9 L13.5,9 Z" />
+</vector>

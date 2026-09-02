@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The level badge in the widget's header. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <corners android:radius="14dp" />
+    <solid android:color="#3A1030" />
+    <stroke
+        android:width="1dp"
+        android:color="#FF4D9D" />
+</shape>

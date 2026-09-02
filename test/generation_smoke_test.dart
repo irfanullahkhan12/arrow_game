@@ -13,7 +13,9 @@ void main() {
       );
       sw.stop();
 
-      expect(board.pieces.length, level);
+      // Two arrows per level.
+      expect(board.pieces.length, level * 2);
+      expect(board.pieces.length, LevelFactory.arrowCount(level));
       expect(
         sw.elapsedMilliseconds,
         lessThan(4000),
