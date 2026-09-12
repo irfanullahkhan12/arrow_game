@@ -20,7 +20,7 @@ void main() {
       SoundService.sampleFor(arrow(ArrowKind.rainbow)),
       contains('rainbow'),
     );
-    expect(SoundService.sampleFor(arrow(ArrowKind.ghost)), contains('gost'));
+    expect(SoundService.sampleFor(arrow(ArrowKind.ghost)), contains('ghost'));
     expect(SoundService.sampleFor(arrow(ArrowKind.bomb)), contains('bomb'));
 
     // No two specials share a sample.

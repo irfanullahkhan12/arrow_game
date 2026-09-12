@@ -22,6 +22,8 @@ class PlayerProfile extends ChangeNotifier {
   static const _kLastGift = 'p_last_gift';
   static const _kSound = 'sound_on';
   static const _kDark = 'dark_theme';
+  static const _kFreeCursor = 'p_free_arrow_cursor';
+  static const _kFreeMilestone = 'p_free_arrow_milestone';
 
   /// Prices, in coins. Special arrows price themselves — see [ArrowKind].
   static const hintPrice = 60;
@@ -29,6 +31,14 @@ class PlayerProfile extends ChangeNotifier {
 
   /// What one rewarded ad is worth.
   static const adCoins = 50;
+
+  /// The free special-arrow drip: two on a fresh install, two more every ten
+  /// levels cleared, and the drip stops while the player is already holding
+  /// [freeArrowCap] specials — so they get spent rather than hoarded. Arrows
+  /// bought in the shop or won from the daily gift ignore the cap.
+  static const freeArrowGrant = 2;
+  static const freeArrowEvery = 10;
+  static const freeArrowCap = 8;
 
   int coins = 0;
 
@@ -45,6 +55,13 @@ class PlayerProfile extends ChangeNotifier {
   bool soundOn = true;
   bool dark = true;
 
+  /// Which kind the next free arrow comes from; it walks the set so the drip
+  /// introduces all four rather than handing out the same one forever.
+  int _freeCursor = 0;
+
+  /// The highest ten-level milestone already paid out.
+  int _freeMilestone = 0;
+
   bool _loaded = false;
   bool get loaded => _loaded;
 
@@ -60,13 +77,15 @@ class PlayerProfile extends ChangeNotifier {
     for (final kind in ArrowKind.buyable) {
       arrows[kind] = prefs.getInt(kind.prefsKey) ?? 0;
     }
+    _freeCursor = prefs.getInt(_kFreeCursor) ?? 0;
+    _freeMilestone = prefs.getInt(_kFreeMilestone) ?? 0;
     // Carry over the stock saved before the other specials existed.
     final legacy = prefs.getInt(_kBoosts);
     if (legacy != null) {
       arrows[ArrowKind.boost] = (arrows[ArrowKind.boost] ?? 0) + legacy;
       await prefs.remove(_kBoosts);
     } else if (prefs.getInt(ArrowKind.boost.prefsKey) == null) {
-      arrows[ArrowKind.boost] = 1; // one to try on a fresh install
+      _grantFreeArrows(); // two to try on a fresh install
     }
     hints = prefs.getInt(_kHints) ?? 3;
     undos = prefs.getInt(_kUndos) ?? 1;
@@ -94,6 +113,8 @@ class PlayerProfile extends ChangeNotifier {
     await prefs.setString(_kLastGift, lastGiftDay);
     await prefs.setBool(_kSound, soundOn);
     await prefs.setBool(_kDark, dark);
+    await prefs.setInt(_kFreeCursor, _freeCursor);
+    await prefs.setInt(_kFreeMilestone, _freeMilestone);
   }
 
   Future<void> _commit() async {
@@ -123,6 +144,20 @@ class PlayerProfile extends ChangeNotifier {
   Future<void> addArrows(ArrowKind kind, int n) async {
     arrows[kind] = stockOf(kind) + n;
     await _commit();
+  }
+
+  /// Hands over [freeArrowGrant] specials, one kind after another, and stops
+  /// early once the player is holding [freeArrowCap] of them. Returns how many
+  /// actually landed. Callers commit.
+  int _grantFreeArrows() {
+    var given = 0;
+    while (given < freeArrowGrant && totalArrows < freeArrowCap) {
+      final kind = ArrowKind.buyable[_freeCursor % ArrowKind.buyable.length];
+      arrows[kind] = stockOf(kind) + 1;
+      _freeCursor = (_freeCursor + 1) % ArrowKind.buyable.length;
+      given++;
+    }
+    return given;
   }
 
   Future<bool> useArrow(ArrowKind kind) async {
@@ -160,10 +195,22 @@ class PlayerProfile extends ChangeNotifier {
 
   // ── Progress ─────────────────────────────────────────────────────────────
 
-  Future<void> recordLevel(int level) async {
+  /// Books a cleared level and pays out the ten-level arrow milestone when one
+  /// has just been passed. Returns how many free specials that handed over —
+  /// zero on an ordinary level, or when the player is already at the cap.
+  Future<int> recordLevel(int level) async {
     gamesPlayed++;
     if (level > bestLevel) bestLevel = level;
+
+    var given = 0;
+    final milestone = (level ~/ freeArrowEvery) * freeArrowEvery;
+    if (milestone > _freeMilestone) {
+      _freeMilestone = milestone;
+      given = _grantFreeArrows();
+    }
+
     await _commit();
+    return given;
   }
 
   // ── Daily gift ───────────────────────────────────────────────────────────

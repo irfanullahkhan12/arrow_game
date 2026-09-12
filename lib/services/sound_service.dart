@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:audioplayers/audioplayers.dart';
 
 import '../models/arrow_kind.dart';
@@ -23,7 +25,7 @@ class SoundService {
   static const _specialSamples = <ArrowKind, String>{
     ArrowKind.boost: 'sounds/black.wav',
     ArrowKind.rainbow: 'sounds/rainbow.wav',
-    ArrowKind.ghost: 'sounds/gost.wav',
+    ArrowKind.ghost: 'sounds/ghost.mp3',
     ArrowKind.bomb: 'sounds/bomb.wav',
   };
 
@@ -60,6 +62,7 @@ class SoundService {
   final List<AudioPlayer> _specialPool = [];
   int _index = 0;
   int _specialIndex = 0;
+  DateTime? _specialActiveUntil;
 
   void start() {
     if (_pool.isNotEmpty) return;
@@ -77,10 +80,10 @@ class SoundService {
       ),
     );
 
-    // Low-latency mode uses Android's SoundPool: samples are cached after the
-    // first play and overlapping shots are cheap.
+    // Use media player mode for all sounds to ensure compatibility with MP3 files
+    // and avoid SoundPool limitations on certain Android devices.
     for (var i = 0; i < _poolSize; i++) {
-      _pool.add(AudioPlayer()..setPlayerMode(PlayerMode.lowLatency));
+      _pool.add(AudioPlayer()..setPlayerMode(PlayerMode.mediaPlayer));
     }
     for (var i = 0; i < _specialPoolSize; i++) {
       _specialPool.add(AudioPlayer()..setPlayerMode(PlayerMode.mediaPlayer));
@@ -101,6 +104,24 @@ class SoundService {
     if (!PlayerProfile.instance.soundOn) return;
 
     final special = _specialSamples.containsKey(piece.kind);
+
+    // If a special arrow was just fired, suppress normal arrow clicks so the
+    // special sound plays cleanly first and is not drowned out by cascading arrows.
+    if (!special &&
+        _specialActiveUntil != null &&
+        DateTime.now().isBefore(_specialActiveUntil!)) {
+      return;
+    }
+
+    if (special) {
+      // Prioritize the special arrow: silence ongoing normal arrow clicks immediately.
+      for (final player in _pool) {
+        unawaited(player.stop());
+      }
+      _specialActiveUntil =
+          DateTime.now().add(const Duration(milliseconds: 2000));
+    }
+
     final pool = special ? _specialPool : _pool;
     if (pool.isEmpty) return;
 
@@ -114,13 +135,14 @@ class SoundService {
     }
 
     try {
-      await player.stop();
-      // A special sounds like itself; only the plain arrows are pitched, so a
-      // long one lands heavier than a stubby one.
-      await player.setPlaybackRate(
-        special ? 1.0 : (piece.cells.length >= _bigFrom ? 0.85 : 1.15),
-      );
       await player.play(AssetSource(sampleFor(piece)));
+      // A special sounds like itself; only the plain arrows are pitched, so a
+      // long one lands heavier than a stubby one. Rate is updated after
+      // play() to adhere to Android MediaPlayer's required lifecycle.
+      if (!special) {
+        final rate = piece.cells.length >= _bigFrom ? 0.85 : 1.15;
+        await player.setPlaybackRate(rate);
+      }
     } catch (_) {
       // Sound must never break the game.
     }
@@ -139,8 +161,6 @@ class SoundService {
     final player = _specialPool[_specialIndex];
     _specialIndex = (_specialIndex + 1) % _specialPool.length;
     try {
-      await player.stop();
-      await player.setPlaybackRate(1);
       await player.play(AssetSource(asset));
     } catch (_) {
       // Sound must never break the game.

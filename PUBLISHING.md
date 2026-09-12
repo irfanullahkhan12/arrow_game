@@ -1,4 +1,4 @@
-nhi?# Publishing to Google Play
+# Publishing to Google Play
 
 Everything the repo can do is done. What is left is account work — keys,
 console entries and store copy — that only you can do.
@@ -18,24 +18,38 @@ It is set in `android/app/build.gradle.kts` (both `namespace` and
 **This can never be changed after the first release goes live**, and the Play
 Console app you create must use exactly this id.
 
-## 1. The upload key — done
-
-The keystore exists:
+## 1. The upload key
 
 | | |
 | --- | --- |
-| Keystore | `C:\Users\Get\upload-keystore.jks` |
+| Keystore | `android/upload-keystore.jks` |
 | Alias | `upload` |
 | Passwords | in `android/key.properties` (gitignored, never committed) |
-| Validity | 10000 days |
-| Upload key SHA-256 | `42:C1:92:77:8E:D4:FF:0E:D6:74:08:70:5B:7E:86:1C:4F:F4:BE:14:55:E1:B3:5B:CA:9B:34:72:8A:64:D2:89` |
+| Validity | 10000 days (until 2054-01-28) |
+| Upload key SHA-256 | `6B:5B:E3:46:F0:4F:A7:9A:E9:C0:DF:8F:F8:0B:80:69:59:92:60:82:FE:83:15:4F:97:58:54:B8:39:FE:6A:98` |
+| Upload key SHA-1 | `E7:30:85:09:2A:2A:AE:D1:EE:FA:24:4F:1C:60:58:EE:52:24:64:F3` |
+| Certificate for Play | `android/upload_certificate.pem` |
+
+> ### WARNING: this is a *replacement* key — Play must be told about it
+>
+> The original upload key (SHA-256 `42:C1:92:...:D2:89`, once at
+> `C:\Users\Get\upload-keystore.jks`) was lost: it is on neither drive of this
+> machine nor in the recycle bin. The key above was generated on 2026-09-12 to
+> take its place.
+>
+> Play only accepts uploads signed with the key it already holds, so until the
+> reset below is approved a bundle signed with this key is **rejected**:
+>
+> **Play Console -> Test and release -> Setup -> App integrity -> App signing
+> -> Request upload key reset**, attaching `android/upload_certificate.pem`.
+> Google usually approves within one to two days.
 
 Gradle picks `key.properties` up automatically, so `flutter build appbundle
 --release` produces an upload-signed bundle with no extra flags.
 
 > ### ⚠️ Back these two files up, today
 >
-> - `C:\Users\Get\upload-keystore.jks`
+> - `android/upload-keystore.jks`
 > - `android/key.properties` — the passwords live **only** here
 >
 > Lose either one and this app can never be updated again: Play only accepts
@@ -65,7 +79,7 @@ fingerprint, so add each one you need.
 to print it again:
 
 ```
-keytool -list -v -keystore C:\Users\Get\upload-keystore.jks -alias upload
+keytool -list -v -keystore android\upload-keystore.jks -alias upload
 ```
 
 **Play App Signing key** — what Google re-signs the app with, so it is the
@@ -123,8 +137,9 @@ one of each purchase in a **licence-tester** account.
 
 ## 4. Version numbers
 
-`pubspec.yaml` line `version: 1.0.0+1` — the part after `+` is the Play version
-code and **must increase on every upload**. Bump it for each release.
+`pubspec.yaml` line `version: 1.0.1+4` — the part after `+` is the Play version
+code and **must increase on every upload**. Bump it for each release. Closed
+testing has already taken `+3`, so the next upload must be `+4` or higher.
 
 ## 5. Play Console
 

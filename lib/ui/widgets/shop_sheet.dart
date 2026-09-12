@@ -36,6 +36,9 @@ class _ShopSheetState extends State<_ShopSheet> {
   /// Which free card is playing a video, if any.
   String? _watching;
 
+  /// Which store card is purchasing, if any.
+  String? _purchasing;
+
   void _toast(String message) {
     if (!mounted) return;
     ScaffoldMessenger.of(context)
@@ -89,11 +92,13 @@ class _ShopSheetState extends State<_ShopSheet> {
   Future<void> _purchase(
     Future<PurchaseOutcome> Function() run,
     String success,
+    String itemId,
   ) async {
-    if (_store.busy) return;
+    if (_store.busy || _purchasing != null) return;
+    setState(() => _purchasing = itemId);
     final outcome = await run();
     if (!mounted) return;
-    setState(() {});
+    setState(() => _purchasing = null);
     switch (outcome) {
       case PurchaseOutcome.success:
         _toast(success);
@@ -153,7 +158,7 @@ class _ShopSheetState extends State<_ShopSheet> {
                       color: GameTheme.gold,
                       label: 'Arrow',
                       busy: _watching == 'arrow',
-                      disabled: _watching != null,
+                      disabled: _watching != null && _watching != 'arrow',
                       onTap: () => _watchFor('arrow'),
                     ),
                     _FreeCard(
@@ -161,7 +166,7 @@ class _ShopSheetState extends State<_ShopSheet> {
                       color: GameTheme.coin,
                       label: '+${PlayerProfile.adCoins}',
                       busy: _watching == 'coins',
-                      disabled: _watching != null,
+                      disabled: _watching != null && _watching != 'coins',
                       onTap: () => _watchFor('coins'),
                     ),
                     _FreeCard(
@@ -169,7 +174,7 @@ class _ShopSheetState extends State<_ShopSheet> {
                       color: GameTheme.lilac,
                       label: 'Hint',
                       busy: _watching == 'hint',
-                      disabled: _watching != null,
+                      disabled: _watching != null && _watching != 'hint',
                       onTap: () => _watchFor('hint'),
                     ),
                   ],
@@ -220,10 +225,11 @@ class _ShopSheetState extends State<_ShopSheet> {
                   color: GameTheme.lilac,
                   label: 'No Ads',
                   action: _store.priceOf(IapService.removeAdsId),
-                  busy: _store.busy,
+                  busy: _purchasing == 'remove_ads',
                   onTap: () => _purchase(
                     _store.buyRemoveAds,
                     'Ads are gone. Enjoy the quiet.',
+                    'remove_ads',
                   ),
                 ),
               const SizedBox(height: 10),
@@ -232,16 +238,17 @@ class _ShopSheetState extends State<_ShopSheet> {
                 color: GameTheme.coin,
                 label: '${IapService.coinPackAmount} Coins',
                 action: _store.priceOf(IapService.coinPackId),
-                busy: _store.busy,
+                busy: _purchasing == 'coins_2000',
                 onTap: () => _purchase(
                   _store.buyCoinPack,
                   '+${IapService.coinPackAmount} coins added.',
+                  'coins_2000',
                 ),
               ),
               TextButton(
-                onPressed: _store.busy
+                onPressed: _purchasing != null
                     ? null
-                    : () => _purchase(_store.restore, 'Purchases restored.'),
+                    : () => _purchase(_store.restore, 'Purchases restored.', 'restore'),
                 child: Text(
                   'Restore',
                   style: GameTheme.font(

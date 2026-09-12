@@ -25,7 +25,9 @@ class PowerItem {
   /// How many the player has. Zero dims the circle and shows the price.
   final int owned;
 
-  /// Coin price, shown when nothing is owned. Zero hides the price chip.
+  /// Coin price. It is not drawn on the circle — the details sheet behind a
+  /// tap shows it — but a priced item with none owned is dimmed, and a free
+  /// one (price zero) stays lit.
   final int price;
 
   /// Overrides the badge entirely — used for the rewards gift flag.
@@ -40,9 +42,9 @@ class PowerItem {
 /// Everything the player reaches for mid-game, in one bordered row: hints,
 /// undo, every special arrow, and rewards at the end.
 ///
-/// Items the player owns glow in their own colour with a count; the rest are
-/// dimmed and wear their price, and tapping one buys it. Nothing is hidden —
-/// a child can see the whole toy box and what each piece costs.
+/// Items the player owns glow in their own colour with a count; the rest sit
+/// dimmed, and tapping one opens the sheet that explains it and prices it.
+/// Nothing is hidden — a child can see the whole toy box.
 ///
 /// It is alive: the rainbow rim turns slowly, the circles pop in one after
 /// another when a board loads, an armed arrow breathes, and a count that
@@ -271,13 +273,9 @@ class _PowerCircle extends StatelessWidget {
       return _chip(override, GameTheme.gold, icon: null);
     }
     if (item.has) return _chip('${item.owned}', tint, icon: null);
-    if (item.price > 0) {
-      return _chip(
-        '${item.price}',
-        GameTheme.coin,
-        icon: Icons.monetization_on_rounded,
-      );
-    }
+    // Nothing owned: the circle just sits dimmed. The price lives in the
+    // details sheet a tap opens, not here — seven coin chips across the row
+    // read as a shop, and the row is meant to read as a toy box.
     return const SizedBox.shrink();
   }
 

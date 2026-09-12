@@ -63,6 +63,11 @@ void main() {
     });
 
     test('an arrow is only spent when there is one to spend', () async {
+      // A fresh install already hands a couple of specials over, so empty the
+      // rainbow shelf before testing what an empty shelf does.
+      while (profile.stockOf(ArrowKind.rainbow) > 0) {
+        await profile.useArrow(ArrowKind.rainbow);
+      }
       await profile.addArrows(ArrowKind.rainbow, 1);
       expect(await profile.useArrow(ArrowKind.rainbow), isTrue);
       expect(profile.stockOf(ArrowKind.rainbow), 0);
@@ -81,6 +86,60 @@ void main() {
       expect(profile.coins, 777);
       expect(profile.stockOf(ArrowKind.ghost), 3);
       expect(profile.hints, hints);
+    });
+  });
+
+  group('the free arrow drip', () {
+    test('a fresh install starts with two specials', () {
+      expect(profile.totalArrows, PlayerProfile.freeArrowGrant);
+    });
+
+    test('every tenth level hands over two more, up to eight', () async {
+      // Levels 1-9 pay nothing; 10 pays out.
+      for (var level = 1; level < PlayerProfile.freeArrowEvery; level++) {
+        expect(await profile.recordLevel(level), 0);
+      }
+      expect(await profile.recordLevel(10), PlayerProfile.freeArrowGrant);
+      expect(profile.totalArrows, 4);
+
+      expect(await profile.recordLevel(20), PlayerProfile.freeArrowGrant);
+      expect(await profile.recordLevel(30), PlayerProfile.freeArrowGrant);
+      expect(profile.totalArrows, PlayerProfile.freeArrowCap);
+
+      // At the cap the drip stops, however many levels go by.
+      expect(await profile.recordLevel(40), 0);
+      expect(await profile.recordLevel(50), 0);
+      expect(profile.totalArrows, PlayerProfile.freeArrowCap);
+
+      // Spend one and the next milestone tops it back up — but only to eight.
+      await profile.useArrow(ArrowKind.boost);
+      expect(await profile.recordLevel(60), 1);
+      expect(profile.totalArrows, PlayerProfile.freeArrowCap);
+    });
+
+    test('a milestone is only ever paid once', () async {
+      expect(await profile.recordLevel(10), PlayerProfile.freeArrowGrant);
+      expect(await profile.recordLevel(10), 0);
+      // Replaying an earlier level pays nothing either.
+      expect(await profile.recordLevel(4), 0);
+    });
+
+    test('the drip walks the set instead of stacking one kind', () async {
+      await profile.recordLevel(10);
+      await profile.recordLevel(20);
+      expect(profile.totalArrows, PlayerProfile.freeArrowCap - 2);
+      for (final kind in ArrowKind.buyable) {
+        expect(profile.stockOf(kind), greaterThan(0), reason: kind.name);
+      }
+    });
+
+    test('what the drip handed over survives a reload', () async {
+      await profile.recordLevel(10);
+      final total = profile.totalArrows;
+      await profile.load();
+      expect(profile.totalArrows, total);
+      // And the milestone is not paid a second time after the reload.
+      expect(await profile.recordLevel(10), 0);
     });
   });
 

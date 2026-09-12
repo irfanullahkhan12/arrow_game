@@ -549,7 +549,7 @@ class _GamePageState extends State<GamePage>
             if (fired.contains(target.piece.id)) continue;
             if (advance < target.distance) break; // sorted nearest-first
             fired.add(target.piece.id);
-            _firePiece(target.piece);
+            _firePiece(target.piece, playSound: false);
           }
         },
       );
@@ -563,10 +563,16 @@ class _GamePageState extends State<GamePage>
         _bumpPieceId = piece.id;
         _bumpBlockerId = ahead.blocker!.id;
         _bumpStep = piece.direction.step;
-        // Travel the empty run, plus a little extra so the tip visibly
-        // presses against the blocker.
-        _bumpCells = math.min(ahead.freeCells + 0.35, 2.2);
+        // Fly the whole empty run of its exit ray, plus a little extra so the
+        // tip visibly presses against the blocker — then the tween reverses
+        // and walks it back down the same line to its own cell.
+        _bumpCells = ahead.freeCells + 0.35;
       });
+      // A long runway takes longer, so the arrow reads as travelling its path
+      // in both directions instead of snapping out and back.
+      _bumpController.duration = Duration(
+        milliseconds: (430 + 95 * _bumpCells).round().clamp(430, 1250),
+      );
       _bumpController.forward(from: 0);
       SoundService.instance.playMiss();
       _snack('🚧', 'Blocked! Move the arrow in the way first.');
@@ -606,10 +612,13 @@ class _GamePageState extends State<GamePage>
   Future<void> _firePiece(
     ArrowPiece piece, {
     void Function(AnimationController)? onProgress,
+    bool playSound = true,
   }) async {
     if (_flights.containsKey(piece.id) || piece.removed) return;
 
-    SoundService.instance.playFire(piece);
+    if (playSound) {
+      SoundService.instance.playFire(piece);
+    }
 
     // A straight shot is always 900 ms; the arrows that take the long way
     // round get time proportional to the distance they cover, so they read as
@@ -664,8 +673,13 @@ class _GamePageState extends State<GamePage>
     final lifeBonus = _lives * 8;
     final reward = 20 + board.level * 2 + lifeBonus;
     await _profile.addCoins(reward);
-    await _profile.recordLevel(board.level);
+    // Every tenth level pays out free specials — see PlayerProfile.
+    final freeArrows = await _profile.recordLevel(board.level);
     if (!mounted) return;
+    if (freeArrows > 0) {
+      _snack('🎁', '$freeArrows free special arrows for reaching '
+          'level ${board.level}!');
+    }
 
     final choice = await showWinDialog(
       context,
@@ -691,9 +705,12 @@ class _GamePageState extends State<GamePage>
     final board = _board;
     if (board == null || _generating) return;
     if (!await _profile.useHint()) {
-      // Out of hints: buy one with coins if they are there, otherwise the
-      // rewards sheet has a video that gives one away.
-      if (!await _buyThen(PlayerProfile.hintPrice, _profile.addHints)) return;
+      // Out of hints. The row no longer wears prices, so nothing is bought
+      // behind the player's back: the rewards sheet is where a hint is
+      // priced, and where a video gives one away.
+      if (!mounted) return;
+      await showShopSheet(context);
+      if (!mounted) return;
       if (!await _profile.useHint()) return;
     }
     ArrowPiece? target;
@@ -733,7 +750,9 @@ class _GamePageState extends State<GamePage>
       return;
     }
     if (!await _profile.useUndo()) {
-      if (!await _buyThen(PlayerProfile.undoPrice, _profile.addUndos)) return;
+      if (!mounted) return;
+      await showShopSheet(context);
+      if (!mounted) return;
       if (!await _profile.useUndo()) return;
     }
     final id = _undoStack.removeLast();
@@ -747,8 +766,8 @@ class _GamePageState extends State<GamePage>
   }
 
   /// Tapping a special on the power row. Owning one arms it; owning none
-  /// buys one on the spot if the coins are there, and otherwise opens the
-  /// tray, where a video will earn it for free.
+  /// opens the tray, which is where the arrow is explained, priced, and
+  /// where a video will earn it for free.
   Future<void> _tapSpecial(ArrowKind kind) async {
     if (_generating) return;
 
@@ -760,21 +779,16 @@ class _GamePageState extends State<GamePage>
     }
 
     if (_profile.stockOf(kind) <= 0) {
-      if (!_profile.canAfford(kind.price)) {
-        final picked = await showArrowPicker(context);
-        if (!mounted || picked == null) return;
-        if (_profile.stockOf(picked) <= 0) return;
-        setState(() => _convertKind = picked);
-        _syncPulse();
-        _snack(
-          _kindEmoji(picked),
-          'Tap any arrow to turn it into a ${picked.label.toLowerCase()}.',
-        );
-        return;
-      }
-      if (!await _profile.spend(kind.price)) return;
-      await _profile.addArrows(kind, 1);
-      if (!mounted) return;
+      final picked = await showArrowPicker(context);
+      if (!mounted || picked == null) return;
+      if (_profile.stockOf(picked) <= 0) return;
+      setState(() => _convertKind = picked);
+      _syncPulse();
+      _snack(
+        _kindEmoji(picked),
+        'Tap any arrow to turn it into a ${picked.label.toLowerCase()}.',
+      );
+      return;
     }
 
     setState(() => _convertKind = kind);
@@ -823,17 +837,6 @@ class _GamePageState extends State<GamePage>
     ArrowKind.bomb => '💣',
     _ => '🖤',
   };
-
-  /// Buys one of something with coins. Falls back to the rewards sheet when
-  /// the player cannot afford it, and reports whether they now own one.
-  Future<bool> _buyThen(int price, Future<void> Function(int) give) async {
-    if (!await _profile.spend(price)) {
-      if (mounted) await showShopSheet(context);
-      return false;
-    }
-    await give(1);
-    return true;
-  }
 
   void _snack(String emoji, String message) {
     if (!mounted) return;
