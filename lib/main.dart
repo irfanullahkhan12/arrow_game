@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:home_widget/home_widget.dart';
 
@@ -31,6 +32,14 @@ export 'ui/game_painter.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  // Android 15 lays every app out edge to edge whether it asked to or not, so
+  // ask to: this is Flutter's half of `enableEdgeToEdge()`, and saying it out
+  // loud is what gives the phones still on Android 10-14 the same layout
+  // instead of two different ones to test. The bars are left transparent —
+  // the neon backdrop is meant to run under them — and every inset they cover
+  // is paid back by the SafeArea inside the page and by the banner below it.
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  SystemChrome.setSystemUIOverlayStyle(GameTheme.systemBars);
   HomeWidget.registerInteractivityCallback(widgetBackgroundCallback);
   // Ads and the store are started from the game page's boot, in that order:
   // what the player has already paid for decides whether ads run at all.

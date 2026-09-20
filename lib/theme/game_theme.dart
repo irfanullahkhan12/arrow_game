@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 /// Single source of truth for every colour in the app, so the whole game reads
@@ -20,6 +21,24 @@ class GameTheme {
       dark ? const Color(0xFF2A0A1D) : const Color(0xFFFFE9F4);
   static Color get bgBottom =>
       dark ? const Color(0xFF150410) : const Color(0xFFFFF6FB);
+
+  /// How the status and navigation bars are dressed for an edge-to-edge
+  /// window: both fully transparent, so the backdrop above runs under them,
+  /// with icons tinted to read against it and no contrast scrim painted
+  /// behind them. Android 15 ignores a bar colour anyway; setting one only
+  /// puts an opaque strip on the phones still running 10-14.
+  static SystemUiOverlayStyle get systemBars => SystemUiOverlayStyle(
+    statusBarColor: Colors.transparent,
+    statusBarIconBrightness: dark ? Brightness.light : Brightness.dark,
+    statusBarBrightness: dark ? Brightness.dark : Brightness.light,
+    systemNavigationBarColor: Colors.transparent,
+    systemNavigationBarDividerColor: Colors.transparent,
+    systemNavigationBarIconBrightness: dark
+        ? Brightness.light
+        : Brightness.dark,
+    systemNavigationBarContrastEnforced: false,
+    systemStatusBarContrastEnforced: false,
+  );
 
   // ── The play area ────────────────────────────────────────────────────────
   // Always a deep rose-plum, so every neon arrow glows against it.

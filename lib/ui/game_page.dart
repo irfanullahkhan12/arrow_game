@@ -3,7 +3,6 @@ import 'dart:isolate';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../game/ai_designer.dart';
 import '../game/flight_path.dart';
@@ -938,9 +937,9 @@ class _GamePageState extends State<GamePage>
       backgroundColor: Colors.transparent,
       surfaceTintColor: Colors.transparent,
       elevation: 0,
-      systemOverlayStyle: GameTheme.dark
-          ? SystemUiOverlayStyle.light
-          : SystemUiOverlayStyle.dark,
+      // Not SystemUiOverlayStyle.light: that one paints the navigation bar
+      // solid black, which is the opposite of edge to edge.
+      systemOverlayStyle: GameTheme.systemBars,
       centerTitle: true,
       leadingWidth: 86,
       leading: Center(

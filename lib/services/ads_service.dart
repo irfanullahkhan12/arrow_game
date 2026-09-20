@@ -406,15 +406,21 @@ class _BannerAdSlotState extends State<BannerAdSlot> {
     // bar of dead space above the system bar.
     if (banner == null || _height <= 0) return const SizedBox.shrink();
 
-    // The ad sits on the bottom edge itself — full width, no padding, no
-    // background, and no safe-area inset underneath it.
-    return MediaQuery.removePadding(
-      context: context,
-      removeBottom: true,
-      child: SizedBox(
-        width: double.infinity,
-        height: _height,
-        child: AdWidget(ad: banner),
+    // Full width, no background — but not flush against the bottom edge any
+    // more. Under edge-to-edge the gesture bar floats over the app instead of
+    // pushing it up, and an ad underneath it is both unreadable and against
+    // AdMob policy, which does not allow an obscured ad. So the ad is lifted
+    // clear of the bar, and the strip it leaves behind shows the backdrop.
+    return Padding(
+      padding: EdgeInsets.only(bottom: MediaQuery.viewPaddingOf(context).bottom),
+      child: MediaQuery.removePadding(
+        context: context,
+        removeBottom: true,
+        child: SizedBox(
+          width: double.infinity,
+          height: _height,
+          child: AdWidget(ad: banner),
+        ),
       ),
     );
   }

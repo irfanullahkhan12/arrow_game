@@ -60,7 +60,14 @@ class _NotifyGalleryState extends State<NotifyGallery> {
           ],
         ),
         body: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 40),
+          // The last card would otherwise end up under the gesture bar: a
+          // Scaffold body is handed the window's full height, insets and all.
+          padding: EdgeInsets.fromLTRB(
+            16,
+            8,
+            16,
+            40 + MediaQuery.viewPaddingOf(context).bottom,
+          ),
           children: [
             _controls(dark),
 
