@@ -35,7 +35,7 @@ class ArrowWidgetProvider : HomeWidgetProvider() {
         // decoded once rather than once per widget.
         val board = decodeBoard(widgetData.getString("board_png_path", null))
         val level = widgetData.getString("widget_level", "LEVEL 1")
-        val status = widgetData.getString("widget_status", "Arrow Escape")
+        val status = widgetData.getString("widget_status", "Arrows Neon")
 
         for (widgetId in appWidgetIds) {
             val views = RemoteViews(context.packageName, R.layout.arrow_widget)

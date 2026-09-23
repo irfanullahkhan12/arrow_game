@@ -1,4 +1,4 @@
-# Arrow Escape - Game Tags
+# Arrows Neon - Game Tags
 
 ## Primary Tags
 - Puzzle
@@ -86,7 +86,7 @@
 
 ## Additional Keywords
 - Neon Puzzle
-- Arrow Escape
+- Arrows Neon
 - Neon Arrows
 - Puzzle Escape
 - Board Escape

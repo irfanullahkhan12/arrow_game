@@ -53,7 +53,7 @@ class ArrowEscapeApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Arrow Escape',
+      title: 'Arrows Neon',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: GameTheme.accent,

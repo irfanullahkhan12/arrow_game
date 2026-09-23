@@ -1,10 +1,10 @@
-# Privacy Policy - Arrow Escape
+# Privacy Policy - Arrows Neon
 
 **Last Updated:** September 14, 2026
 
 ## Introduction
 
-Arrow Escape ("the Game") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and protect your information when you use our mobile game.
+Arrows Neon ("the Game") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and protect your information when you use our mobile game.
 
 ## Information We Collect
 
@@ -105,7 +105,7 @@ If you have questions about this Privacy Policy or our data practices, please co
 
 To delete all your game data:
 1. Go to your device's Settings
-2. Find Arrow Escape
+2. Find Arrows Neon
 3. Select "Clear Data" or "Uninstall" the app
 
 ## Compliance

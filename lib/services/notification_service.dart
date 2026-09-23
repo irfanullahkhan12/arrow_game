@@ -189,7 +189,7 @@ class NotificationService {
       styleInformation: BigTextStyleInformation(
         'Level $level is still on the board. '
         'Tap to pick up exactly where you left off.',
-        contentTitle: '<b>Arrow Escape</b> · Level $level',
+        contentTitle: '<b>Arrows Neon</b> · Level $level',
         htmlFormatContent: true,
         htmlFormatContentTitle: true,
         summaryText: 'Tap to play',
@@ -197,7 +197,7 @@ class NotificationService {
       category: AndroidNotificationCategory.reminder,
       visibility: NotificationVisibility.public,
       autoCancel: true,
-      ticker: 'Arrow Escape',
+      ticker: 'Arrows Neon',
     ),
     iOS: const DarwinNotificationDetails(),
   );

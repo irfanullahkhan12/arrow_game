@@ -46,7 +46,7 @@
             android:textStyle="bold"
             android:maxLines="1"
             android:ellipsize="end"
-            android:text="Arrow Escape" />
+            android:text="Arrows Neon" />
     </LinearLayout>
 
     <!-- The live board -->

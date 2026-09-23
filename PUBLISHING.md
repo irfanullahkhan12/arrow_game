@@ -175,7 +175,7 @@ Then promote to production.
   dev machine still builds.
 - `key.properties`, `*.jks` and `*.keystore` gitignored.
 - `minSdk` 24 (AdMob's floor), `targetSdk` from the Flutter toolchain.
-- App label "Arrow Escape", launcher icons generated from the app icon,
+- App label "Arrows Neon", launcher icons generated from the app icon,
   adaptive icon included.
 - Ads and purchases both degrade to nothing when their keys are absent, so a
   keyless build never crashes and never shows a broken store.

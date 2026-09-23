@@ -1,4 +1,4 @@
-# Arrow Escape
+# Arrows Neon
 
 A neon arrow puzzle. Every arrow has to leave the board, and it can only leave
 if nothing is standing in its exit ray. Tap one with a clear path and it flies
